@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Order {
+  id        String    @id @default(cuid())
+  name      String
+  phone     String
+  meals     Json?     // اختياري (يمكن أن يكون null)
+  status    String   @default("new")
+  confirmed Boolean   @default(false)
+  createdAt DateTime  @default(now())
+}
+
+model Restaurant {
+  id        String    @id @default(cuid())
+  name      String
+  imageUrl  String?  
+  meals     Meal[]
+  createdAt DateTime  @default(now())
+}
+
+model Meal {
+  id           String     @id @default(cuid())
+  name         String
+  price        Float
+  imageUrl     String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantId String
+  createdAt    DateTime   @default(now())
+}
+
+
+
+
+model User {
+  id    Int    @id @default(autoincrement())
+  name  String
+  email String @unique
+  password String
+  role  String @default("user") // إما "user" أو "admin"
+}
