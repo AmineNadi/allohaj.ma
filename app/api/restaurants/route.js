@@ -1,7 +1,6 @@
-// /app/api/restaurants/route.js
 import prisma from '@/lib/prisma';
-import cloudinary from 'lib/cloudinary';  // استيراد Cloudinary
-import { v2 as cloudinaryV2 } from 'cloudinary';  // التأكد من استخدام Cloudinary API
+import cloudinary from 'lib/cloudinary';
+import { v2 as cloudinaryV2 } from 'cloudinary';
 
 export async function GET() {
   try {
@@ -34,17 +33,28 @@ export async function POST(req) {
         status: 400,
       });
     }
-    console.log('file:', file);
-console.log('file stream:', file.stream());
+
     let imageUrl = null;
+
     if (file && file.name) {
-      // رفع الصورة إلى Cloudinary
-      const result = await cloudinaryV2.uploader.upload(file.stream(), {
-        folder: 'restaurants_images', // تحديد المجلد في Cloudinary
-        public_id: `restaurant_${Date.now()}`, // تحديد ID فريد
+      // ❌ هنا أيضاً يجب استبدال file.stream() باستخدام buffer
+
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      const result = await new Promise((resolve, reject) => {
+        const upload = cloudinaryV2.uploader.upload_stream({
+          folder: 'restaurants_images',
+          public_id: `restaurant_${Date.now()}`
+        }, (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        });
+
+        upload.end(buffer);
       });
 
-      imageUrl = result.secure_url;  // الحصول على رابط الصورة الآمن من Cloudinary
+      imageUrl = result.secure_url;
     }
 
     const existing = await prisma.restaurant.findFirst({ where: { name } });
