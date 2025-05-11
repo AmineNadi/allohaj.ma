@@ -24,7 +24,8 @@ export async function POST(req) {
     if (!name || !price || !restaurantId || !file) {
       return NextResponse.json({ error: 'جميع الحقول مطلوبة' }, { status: 400 });
     }
-
+    console.log('file:', file);
+console.log('file stream:', file.stream());
     // رفع الصورة إلى Cloudinary
     const result = await cloudinaryV2.uploader.upload(file.stream(), {
       folder: 'meals_images', // تحديد المجلد في Cloudinary

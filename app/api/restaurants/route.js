@@ -34,7 +34,8 @@ export async function POST(req) {
         status: 400,
       });
     }
-
+    console.log('file:', file);
+console.log('file stream:', file.stream());
     let imageUrl = null;
     if (file && file.name) {
       // رفع الصورة إلى Cloudinary
