@@ -1,5 +1,4 @@
-import cloudinary from 'lib/cloudinary';
-import { v2 as cloudinaryV2 } from 'cloudinary';
+import { put } from '@vercel/blob';
 import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -11,6 +10,7 @@ export async function POST(req) {
     }
 
     const formData = await req.formData();
+
     const name = formData.get('name');
     const price = parseInt(formData.get('price'));
     const restaurantId = formData.get('restaurantId');
@@ -20,25 +20,14 @@ export async function POST(req) {
       return NextResponse.json({ error: 'جميع الحقول مطلوبة' }, { status: 400 });
     }
 
-    // ❌ خطأ هنا: استخدام file.stream() في بيئة Vercel يسبب مشاكل
-
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const result = await new Promise((resolve, reject) => {
-      const upload = cloudinaryV2.uploader.upload_stream({
-        folder: 'meals_images',
-        public_id: `meal_${Date.now()}`
-      }, (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      });
-
-      upload.end(buffer);
+    // رفع الصورة إلى Vercel Blob
+    const blob = await put(`meal_${Date.now()}_${file.name}`, file, {
+      access: 'public', // تحديد الوصول العام للصورة
     });
 
-    const imageUrl = result.secure_url;
+    const imageUrl = blob.url;  // الحصول على الرابط المباشر للصورة
 
+    // حفظ البيانات في قاعدة البيانات باستخدام Prisma
     const meal = await prisma.meal.create({
       data: {
         name,

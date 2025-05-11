@@ -1,6 +1,6 @@
+import { put } from '@vercel/blob';
 import prisma from '@/lib/prisma';
-import cloudinary from 'lib/cloudinary';
-import { v2 as cloudinaryV2 } from 'cloudinary';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
@@ -37,24 +37,12 @@ export async function POST(req) {
     let imageUrl = null;
 
     if (file && file.name) {
-      // ❌ هنا أيضاً يجب استبدال file.stream() باستخدام buffer
-
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
-      const result = await new Promise((resolve, reject) => {
-        const upload = cloudinaryV2.uploader.upload_stream({
-          folder: 'restaurants_images',
-          public_id: `restaurant_${Date.now()}`
-        }, (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        });
-
-        upload.end(buffer);
+      // رفع الصورة إلى Vercel Blob
+      const blob = await put(`restaurant_${Date.now()}_${file.name}`, file, {
+        access: 'public',
       });
 
-      imageUrl = result.secure_url;
+      imageUrl = blob.url;  // الحصول على الرابط المباشر للصورة
     }
 
     const existing = await prisma.restaurant.findFirst({ where: { name } });
