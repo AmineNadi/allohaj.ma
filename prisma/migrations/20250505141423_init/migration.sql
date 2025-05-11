@@ -1,9 +1,0 @@
--- CreateTable
-CREATE TABLE "Order" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "name" TEXT NOT NULL,
-    "phone" TEXT NOT NULL,
-    "restaurant" TEXT NOT NULL,
-    "meal" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);

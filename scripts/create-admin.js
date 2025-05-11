@@ -1,27 +1,28 @@
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcrypt'
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs'); // استخدام bcryptjs بدلًا من bcrypt
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
-  const hashedPassword = await bcrypt.hash('admin123', 10)
+  const hashedPassword = await bcrypt.hash('admin123', 10); // نفس الدالة متوفرة في bcryptjs
 
   await prisma.user.create({
     data: {
-      name: 'user',           
+      name: 'user',
       email: 'user@example.com',
       password: hashedPassword,
-      role: 'admin'              
+      role: 'admin',
     },
-  })
+  });
 
+  console.log('✅ Admin user created successfully');
 }
 
 main()
   .catch((e) => {
-    console.error(e)
-    process.exit(1)
+    console.error('❌ Error creating admin user:', e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });
