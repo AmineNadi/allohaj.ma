@@ -1,44 +1,48 @@
-import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient();
+export async function GET() {
+  try {
+    const meals = await prisma.meal.findMany({
+      include: { restaurant: true },
+    });
+    return Response.json(meals);
+  } catch (error) {
+    return Response.json({ error: 'خطأ في جلب الوجبات' }, { status: 500 });
+  }
+}
 
 export async function POST(req) {
   try {
     const formData = await req.formData();
     const name = formData.get('name');
-    const description = formData.get('description');
     const price = parseFloat(formData.get('price'));
-    const restaurantId = formData.get('restaurantId');
-    const imageFile = formData.get('image');
+    const restaurantId = parseInt(formData.get('restaurantId'), 10);
+    const image = formData.get('image');
 
     let imageUrl = null;
 
-    if (imageFile && typeof imageFile.arrayBuffer === 'function') {
-      const buffer = Buffer.from(await imageFile.arrayBuffer());
-
-      const blob = await put(`meals/${Date.now()}-${imageFile.name}`, buffer, {
+    if (image && image.name) {
+      const blob = await put(image.name, image, {
         access: 'public',
-        token: process.env.BLOB_READ_WRITE_TOKEN,
       });
-
       imageUrl = blob.url;
     }
 
     const meal = await prisma.meal.create({
       data: {
         name,
-        description,
         price,
         image: imageUrl,
-        restaurantId,
+        restaurant: {
+          connect: { id: restaurantId },
+        },
       },
     });
 
-    return NextResponse.json(meal);
+    return Response.json(meal);
   } catch (error) {
     console.error('خطأ في إضافة الوجبة:', error);
-    return NextResponse.json({ error: 'فشل في إضافة الوجبة' }, { status: 500 });
+    return Response.json({ error: 'فشل في إضافة الوجبة' }, { status: 500 });
   }
 }
