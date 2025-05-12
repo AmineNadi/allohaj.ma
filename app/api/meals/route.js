@@ -10,7 +10,7 @@ export async function GET() {
   } catch (error) {
     return Response.json({ error: 'خطأ في جلب الوجبات' }, { status: 500 });
   }
-}
+} 
 
 export async function POST(req) {
   try {
