@@ -1,7 +1,9 @@
-import { upload } from '@vercel/blob';
+// /app/api/restaurants/route.js
 import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-
+import { put } from '@vercel/blob';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 export async function GET() {
   try {
     const restaurants = await prisma.restaurant.findMany({
@@ -13,57 +15,50 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ restaurants });
+    return Response.json({ restaurants });
   } catch (error) {
     console.error('خطأ في جلب المطاعم:', error);
-    return new NextResponse(JSON.stringify({ error: 'فشل في جلب المطاعم' }), {
+    return new Response(JSON.stringify({ error: 'فشل في جلب المطاعم' }), {
       status: 500,
     });
   }
 }
 
 export async function POST(req) {
-  try {
-    const formData = await req.formData();
-    const name = formData.get('name');
-    const file = formData.get('image');
-
-    if (!name || name.trim() === '') {
-      return new NextResponse(JSON.stringify({ error: 'اسم المطعم مطلوب' }), {
-        status: 400,
+    try {
+      const formData = await req.formData();
+      const name = formData.get('name');
+      const city = formData.get('city');
+      const address = formData.get('address');
+      const phone = formData.get('phone');
+      const imageFile = formData.get('image');
+  
+      let imageUrl = null;
+  
+      if (imageFile && typeof imageFile.arrayBuffer === 'function') {
+        const buffer = Buffer.from(await imageFile.arrayBuffer());
+  
+        const blob = await put(`restaurants/${Date.now()}-${imageFile.name}`, buffer, {
+          access: 'public',
+          token: process.env.BLOB_READ_WRITE_TOKEN,
+        });
+  
+        imageUrl = blob.url;
+      }
+  
+      const restaurant = await prisma.restaurant.create({
+        data: {
+          name,
+          city,
+          address,
+          phone,
+          image: imageUrl,
+        },
       });
+  
+      return NextResponse.json(restaurant);
+    } catch (error) {
+      console.error('خطأ في إضافة المطعم:', error);
+      return NextResponse.json({ error: 'فشل في إضافة المطعم' }, { status: 500 });
     }
-
-    let imageUrl = null;
-
-    if (file && file.name) {
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
-      const uploaded = await upload(`restaurants_images/${Date.now()}_${file.name}`, buffer, {
-        access: 'public',
-        token: process.env.BLOB_READ_WRITE_TOKEN,
-      });
-
-      imageUrl = uploaded.url;
-    }
-
-    const existing = await prisma.restaurant.findFirst({ where: { name } });
-    if (existing) {
-      return new NextResponse(JSON.stringify({ error: 'المطعم موجود مسبقاً' }), {
-        status: 409,
-      });
-    }
-
-    const newRestaurant = await prisma.restaurant.create({
-      data: { name, imageUrl },
-    });
-
-    return NextResponse.json({ message: 'تمت إضافة المطعم بنجاح', restaurant: newRestaurant });
-  } catch (error) {
-    console.error('خطأ في إضافة المطعم:', error);
-    return new NextResponse(JSON.stringify({ error: 'فشل في إضافة المطعم' }), {
-      status: 500,
-    });
   }
-}
