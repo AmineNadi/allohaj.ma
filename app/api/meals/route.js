@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req) {
   try {
-    // تحقق أن المحتوى هو form-data
+    // تحقق من أن المحتوى هو form-data
     const contentType = req.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {
       return NextResponse.json({ error: 'نوع المحتوى غير مدعوم' }, { status: 400 });
@@ -12,7 +12,6 @@ export async function POST(req) {
 
     // قراءة البيانات المرسلة من النموذج
     const formData = await req.formData();
-
     const name = formData.get('name');
     const price = parseInt(formData.get('price'));
     const restaurantId = formData.get('restaurantId');
@@ -23,12 +22,13 @@ export async function POST(req) {
       return NextResponse.json({ error: 'جميع الحقول مطلوبة' }, { status: 400 });
     }
 
-    // رفع الصورة إلى Vercel Blob
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
+    // تحميل الصورة إلى Vercel Blob
     const fileName = `${Date.now()}-${file.name}`;
-    const imageUrl = await put(buffer, { name: fileName });
+    const blob = await put(`uploads/${fileName}`, file, {
+      access: 'public', // يمكنك تغيير هذا إلى 'private' إذا كنت تحتاج إلى التحكم في الوصول
+    });
+
+    const imageUrl = blob.url; // رابط الصورة المخزنة في Vercel Blob
 
     // حفظ البيانات في قاعدة البيانات باستخدام Prisma
     const meal = await prisma.meal.create({
