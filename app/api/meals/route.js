@@ -1,33 +1,40 @@
-import { put } from '@vercel/blob';
+import { Blob } from '@vercel/blob';
 import prisma from '@/lib/prisma';
-import { NextResponse } from 'next/server';
+
+const blob = new Blob({
+  token: process.env.BLOB_READ_WRITE_TOKEN,
+});
+
+const uploadFile = async (file) => {
+  try {
+    const path = `meals_images/${file.name}`;
+    const response = await blob.upload(path, file);
+    return response.url;
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw new Error("Failed to upload file.");
+  }
+};
 
 export async function POST(req) {
   try {
     const contentType = req.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {
-      return NextResponse.json({ error: 'نوع المحتوى غير مدعوم' }, { status: 400 });
+      return new Response(JSON.stringify({ error: 'Unsupported content type' }), { status: 400 });
     }
 
     const formData = await req.formData();
-
     const name = formData.get('name');
     const price = parseInt(formData.get('price'));
     const restaurantId = formData.get('restaurantId');
     const file = formData.get('image');
 
     if (!name || !price || !restaurantId || !file) {
-      return NextResponse.json({ error: 'جميع الحقول مطلوبة' }, { status: 400 });
+      return new Response(JSON.stringify({ error: 'All fields are required' }), { status: 400 });
     }
 
-    // رفع الصورة إلى Vercel Blob
-    const blob = await put(`meal_${Date.now()}_${file.name}`, file, {
-      access: 'public', // تحديد الوصول العام للصورة
-    });
+    const imageUrl = await uploadFile(file); // Upload the image to Vercel Blob
 
-    const imageUrl = blob.url;  // الحصول على الرابط المباشر للصورة
-
-    // حفظ البيانات في قاعدة البيانات باستخدام Prisma
     const meal = await prisma.meal.create({
       data: {
         name,
@@ -37,9 +44,9 @@ export async function POST(req) {
       },
     });
 
-    return NextResponse.json({ meal }, { status: 201 });
+    return new Response(JSON.stringify({ meal }), { status: 201 });
   } catch (error) {
     console.error('Error adding meal:', error);
-    return NextResponse.json({ error: 'حدث خطأ أثناء إضافة الوجبة' }, { status: 500 });
+    return new Response(JSON.stringify({ error: 'Failed to add meal' }), { status: 500 });
   }
 }
