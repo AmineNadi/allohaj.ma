@@ -1,26 +1,12 @@
-import { Blob } from '@vercel/blob';
+import { upload } from '@vercel/blob';
 import prisma from '@/lib/prisma';
-
-const blob = new Blob({
-  token: process.env.BLOB_READ_WRITE_TOKEN,
-});
-
-const uploadFile = async (file) => {
-  try {
-    const path = `meals_images/${file.name}`;
-    const response = await blob.upload(path, file);
-    return response.url;
-  } catch (error) {
-    console.error("Error uploading file:", error);
-    throw new Error("Failed to upload file.");
-  }
-};
+import { NextResponse } from 'next/server';
 
 export async function POST(req) {
   try {
     const contentType = req.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {
-      return new Response(JSON.stringify({ error: 'Unsupported content type' }), { status: 400 });
+      return NextResponse.json({ error: 'نوع المحتوى غير مدعوم' }, { status: 400 });
     }
 
     const formData = await req.formData();
@@ -30,10 +16,18 @@ export async function POST(req) {
     const file = formData.get('image');
 
     if (!name || !price || !restaurantId || !file) {
-      return new Response(JSON.stringify({ error: 'All fields are required' }), { status: 400 });
+      return NextResponse.json({ error: 'جميع الحقول مطلوبة' }, { status: 400 });
     }
 
-    const imageUrl = await uploadFile(file); // Upload the image to Vercel Blob
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const uploaded = await upload(`meals_images/${Date.now()}_${file.name}`, buffer, {
+      access: 'public',
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    });
+
+    const imageUrl = uploaded.url;
 
     const meal = await prisma.meal.create({
       data: {
@@ -44,9 +38,9 @@ export async function POST(req) {
       },
     });
 
-    return new Response(JSON.stringify({ meal }), { status: 201 });
+    return NextResponse.json({ meal }, { status: 201 });
   } catch (error) {
     console.error('Error adding meal:', error);
-    return new Response(JSON.stringify({ error: 'Failed to add meal' }), { status: 500 });
+    return NextResponse.json({ error: 'حدث خطأ أثناء إضافة الوجبة' }, { status: 500 });
   }
 }
