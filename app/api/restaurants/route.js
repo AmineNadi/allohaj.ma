@@ -1,7 +1,6 @@
-// /app/api/restaurants/route.js
+import { put } from '@vercel/blob';
 import prisma from '@/lib/prisma';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
@@ -14,10 +13,10 @@ export async function GET() {
       },
     });
 
-    return Response.json({ restaurants });
+    return NextResponse.json({ restaurants });
   } catch (error) {
     console.error('خطأ في جلب المطاعم:', error);
-    return new Response(JSON.stringify({ error: 'فشل في جلب المطاعم' }), {
+    return new NextResponse(JSON.stringify({ error: 'فشل في جلب المطاعم' }), {
       status: 500,
     });
   }
@@ -30,7 +29,7 @@ export async function POST(req) {
     const file = formData.get('image');
 
     if (!name || name.trim() === '') {
-      return new Response(JSON.stringify({ error: 'اسم المطعم مطلوب' }), {
+      return new NextResponse(JSON.stringify({ error: 'اسم المطعم مطلوب' }), {
         status: 400,
       });
     }
@@ -39,19 +38,14 @@ export async function POST(req) {
     if (file && file.name) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-      await mkdir(uploadDir, { recursive: true });
 
       const fileName = `${Date.now()}-${file.name}`;
-      const filePath = path.join(uploadDir, fileName);
-      await writeFile(filePath, buffer);
-
-      imageUrl = `/uploads/${fileName}`;
+      imageUrl = await put(buffer, { name: fileName });
     }
 
     const existing = await prisma.restaurant.findFirst({ where: { name } });
     if (existing) {
-      return new Response(JSON.stringify({ error: 'المطعم موجود مسبقاً' }), {
+      return new NextResponse(JSON.stringify({ error: 'المطعم موجود مسبقاً' }), {
         status: 409,
       });
     }
@@ -60,10 +54,10 @@ export async function POST(req) {
       data: { name, imageUrl },
     });
 
-    return Response.json({ message: 'تمت إضافة المطعم بنجاح', restaurant: newRestaurant });
+    return NextResponse.json({ message: 'تمت إضافة المطعم بنجاح', restaurant: newRestaurant });
   } catch (error) {
     console.error('خطأ في إضافة المطعم:', error);
-    return new Response(JSON.stringify({ error: 'فشل في إضافة المطعم' }), {
+    return new NextResponse(JSON.stringify({ error: 'فشل في إضافة المطعم' }), {
       status: 500,
     });
   }
