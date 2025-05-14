@@ -8,7 +8,7 @@ const IconsSocial = () => {
         {
             name:"Instagram",
             icon: <FaInstagram size={20}/>,
-            link: "https://www.instagram.com/mustapha_lhajj/"
+            link: "https://www.instagram.com/allohaj.ma/"
         },
         {
             name:"Whatsapp",
@@ -18,7 +18,7 @@ const IconsSocial = () => {
         {
             name:"Tiktok",
             icon: <FaTiktok size={20} color='#ff0050'/>,
-            link: "https://www.tiktok.com/mustapha_lhajj/"
+            link: "https://www.tiktok.com/@allohaj33"
         },
         
     ]
