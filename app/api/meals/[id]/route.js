@@ -1,3 +1,5 @@
+//app/api/meals/[id]/route.js
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma'
 
 export async function DELETE(request, { params }) {
@@ -16,3 +18,30 @@ export async function DELETE(request, { params }) {
     });
   }
 }
+export async function PUT(request, { params }) {
+    const { id } = await params;
+  
+    try {
+      const { name, price, imageUrl } = await request.json();
+  
+      console.log('🧪 Incoming data:', { name, price, imageUrl });
+  
+      if (!name?.trim() || !price || !imageUrl?.trim()) {
+        return NextResponse.json({ error: 'جميع الحقول مطلوبة' }, { status: 400 });
+      }
+  
+      const updatedMeal = await prisma.meal.update({
+        where: { id },
+        data: {
+          name: name.trim(),
+          price: parseFloat(price),
+          imageUrl: imageUrl.trim(),
+        },
+      });
+  
+      return NextResponse.json({ success: true, meal: updatedMeal });
+    } catch (error) {
+      console.error('❌ Error updating meal:', error);
+      return NextResponse.json({ error: 'فشل تحديث الوجبة' }, { status: 500 });
+    }
+  }

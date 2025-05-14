@@ -50,7 +50,10 @@ export default function HomePage() {
   const [expandedRestaurantId, setExpandedRestaurantId] = useState(null);
   const [loadingRestaurantId, setLoadingRestaurantId] = useState(null);
   const [isLoadingRestaurants, setIsLoadingRestaurants] = useState(true); 
+  const [pendingFormData, setPendingFormData] = useState(null);
+
   const [showDialog, setShowDialog] = useState(false);
+  const totalPrice = selectedMeals.reduce((sum, meal) => sum + meal.price, 0);
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -81,50 +84,41 @@ export default function HomePage() {
     });
   };
 
-  const validateForm = () => {
-    const phoneRegex = /^\d{10,}$/;
-    if (
-      selectedMeals.length === 0 ||
-      !userData.name ||
-      !userData.phone ||
-      !phoneRegex.test(userData.phone)
-    ) {
-      toast.error("الرجاء اختيار وجبة واحدة على الأقل وملء جميع المعلومات بشكل صحيح (رقم هاتف مكون من 10 أرقام على الأقل)");
-      return false;
+  const handleFormValid = (formData) => {
+    if (selectedMeals.length === 0) {
+      toast.error("الرجاء اختيار وجبة واحدة على الأقل");
+      return;
     }
-    return true;
+  
+    // Pass form data to submitOrder or save it in state
+    setPendingFormData(formData);
+  
+    // فتح نافذة التأكيد
+    setShowDialog(true);
   };
   
-  // عرض الـ Dialog بعد التحقق
-  const confirmAndSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setShowDialog(true);
-    }
-  };
-  
-  // إرسال الطلب بعد الموافقة
-  const submitOrder = async () => {
+  const submitOrder = async ({ name, phone }) => {
     const res = await fetch('/api/order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: userData.name,
-        phone: userData.phone,
+        name,
+        phone,
         meals: selectedMeals.map((m) => ({
           restaurant: m.restaurantName,
-          meal: `${m.mealName} - ${m.price} DH`,
+          meal: m.mealName,
+          price: m.price,
         })),
+        
       }),
     });
   
     if (res.ok) {
-      toast.success("تم إرسال الطلب بنجاح");
-      setUserData({ name: '', phone: '' });
+      toast.success('تم إرسال الطلب بنجاح');
       setSelectedMeals([]);
       setShowDialog(false);
     } else {
-      toast.error("حدث خطأ في إرسال الطلب");
+      toast.error('حدث خطأ في إرسال الطلب');
     }
   };
 
@@ -281,11 +275,7 @@ export default function HomePage() {
             )}
           </div>
 
-          <OrderForm
-            userData={userData}
-            setUserData={setUserData}
-            handleSubmit={confirmAndSubmit}
-          />
+          <OrderForm onValid={handleFormValid} />
 
 
         </div>
@@ -297,7 +287,8 @@ export default function HomePage() {
           <AlertDialogHeader>
             <AlertDialogTitle>تأكيد إرسال الطلب</AlertDialogTitle>
             <AlertDialogDescription>
-              {`${userData.name} هل أنت متأكد أنك تريد إرسال الطلب التالي :  `}
+            {`${pendingFormData?.name || ''}، هل أنت متأكد أنك تريد إرسال الطلب التالي؟`}
+
             </AlertDialogDescription>
 
             {/* قائمة الوجبات */}
@@ -305,15 +296,23 @@ export default function HomePage() {
               {selectedMeals.map((meal, idx) => (
                 <li key={idx}>
                   {meal.restaurantName}: {meal.mealName} - {meal.price} DH
+                  
                 </li>
               ))}
+              <span className="text-green-500 font-bold block mt-6" >المجموع الكلي : <span>{  totalPrice + `DH` }</span></span>
             </ul>
 
           </AlertDialogHeader>
 
           <AlertDialogFooter>
             
-            <AlertDialogAction className="bg-green-600 hover:bg-green-700 text-white" onClick={submitOrder}>تأكيد الطلب</AlertDialogAction>
+            <AlertDialogAction className="bg-green-600 hover:bg-green-700 text-white" onClick={() => {
+    if (pendingFormData) {
+      submitOrder(pendingFormData);
+      setPendingFormData(null); // تنظيف بعد الإرسال
+    }
+  }}
+>تأكيد الطلب</AlertDialogAction>
             <AlertDialogCancel>إلغاء</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
