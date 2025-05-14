@@ -151,7 +151,7 @@ const [loading, setLoading] = useState(true);
         </AlertDialogContent>
       </AlertDialog>
       <AlertDialog  open={openEditDialog} onOpenChange={setOpenEditDialog}>
-        <AlertDialogContent className='h-max max-h-[95vh] overflow-y-auto'>
+        <AlertDialogContent className='h-max max-h-[85vh] md:max-h-[95vh] overflow-y-auto'>
             <AlertDialogHeader>
             <AlertDialogTitle className='mb-6 text-center'>تعديل المطعم والوجبات</AlertDialogTitle>
             </AlertDialogHeader>
