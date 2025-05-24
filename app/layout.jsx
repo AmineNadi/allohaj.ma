@@ -1,14 +1,11 @@
-import Head from 'next/head';
 import SessionWrapper from "@/components/SessionWrapper"; 
-import { Cairo} from "next/font/google";
+import { Cairo } from "next/font/google";
 import "./globals.css";
-
 
 const cairoSans = Cairo({
   subsets: ["latin"],
-  weight: ["400","500","800"],
+  weight: ["400", "500", "800"],
 });
-
 
 export const metadata = {
   title: "Allohaj.ma",
@@ -17,20 +14,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <Head>
-      <link rel="manifest" href="/manifest.json" />
-<meta name="theme-color" content="#8936FF" />
-<link rel="apple-touch-icon" href="/icon512_rounded.png" />
-
-      </Head>
-      <body
-        className={`${cairoSans.className}  antialiased`}
-      >
-        <SessionWrapper>
-          {children}
-        </SessionWrapper>
-        
+    <html lang="ar" >
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#8936FF" />
+        <link rel="apple-touch-icon" href="/icon512_rounded.png" />
+      </head>
+      <body className={`${cairoSans.className} antialiased`}>
+        <SessionWrapper>{children}</SessionWrapper>
       </body>
     </html>
   );
