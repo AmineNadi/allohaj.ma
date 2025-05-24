@@ -20,6 +20,7 @@ import Hero from "@/components/Hero";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { ChevronDown } from "lucide-react";
+import InstallButton from "@/components/InstallButton";
 
 
 const interSans = Inter({
@@ -128,6 +129,7 @@ export default function HomePage() {
       <main className="bg-gray-50 min-h-screen py-10">
         <div className="mx-auto px-4 md:px-9 lg:px-20">
           <Hero />
+          <InstallButton />
           <div className="grid grid-cols-1 gap-8 mb-12">
             {isLoadingRestaurants ? (
               // Skeleton loading أثناء تحميل المطاعم
@@ -276,7 +278,7 @@ export default function HomePage() {
           </div>
 
           <OrderForm onValid={handleFormValid} />
-
+          
 
         </div>
       </main>

@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import SessionWrapper from "@/components/SessionWrapper"; 
 import { Cairo} from "next/font/google";
 import "./globals.css";
@@ -17,6 +18,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <Head>
+      <link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#8936FF" />
+<link rel="apple-touch-icon" href="/icon512_rounded.png" />
+
+      </Head>
       <body
         className={`${cairoSans.className}  antialiased`}
       >
