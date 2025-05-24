@@ -33,7 +33,7 @@ export default function InstallButton() {
   if (!canInstall) return null;
 
   return (
-    <button onClick={handleInstall} className="btn-install">
+    <button onClick={handleInstall} className="flex justify-center self-center transition duration-300 ease mb-[32px] bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-4 rounded-lg w-[200px] text-base font-semibold">
       📲 تثبيت التطبيق
     </button>
   );
