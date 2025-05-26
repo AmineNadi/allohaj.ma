@@ -3,6 +3,7 @@
     "short_name": "Allohaj Admin",
     "description": "لوحة التحكم الخاصة بالمشرف",
     "start_url": "/login",
+    "id": "/login",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#ffffff",
