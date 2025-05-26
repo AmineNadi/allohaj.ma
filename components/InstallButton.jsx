@@ -93,7 +93,7 @@ export default function InstallButton() {
                 <h2 className="text-lg font-bold mb-2 text-center">Comment télécharger l'application</h2>
                 <div className="text-sm mb-4">
                 <span className='flex items-center gap-1.5 flex-wrap'>1. Cliquez sur le bouton de partage <IoShareOutline size={14} className='text-blue-800' /> dans la fenêtre du navigateur. </span>
-                  <span>3. Sélectionnez <strong>« Ajouter à l’écran d’accueil »</strong>.</span>
+                  <span>3. Sélectionnez <strong>« Sur l'ecran d'accueil »</strong>.</span>
                   
                 </div>
                 <button

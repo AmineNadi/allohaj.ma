@@ -1,0 +1,31 @@
+{
+    "name": "Allohaj Admin",
+    "short_name": "Allohaj Admin",
+    "description": "لوحة التحكم الخاصة بالمشرف",
+    "start_url": "/login",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "orientation": "any",
+    "icons": [
+      {
+        "src": "icon512_maskable.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      },
+      {
+        "src": "icon512_rounded.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "icon-196.png",
+        "sizes": "196x196",
+        "type": "image/png",
+        "purpose": "any"
+      }
+    ]
+  }
+  

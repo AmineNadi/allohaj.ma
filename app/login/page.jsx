@@ -2,6 +2,7 @@
 import { signIn, useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import AdminInstallButton from '@/components/AdminInstallButton';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -63,6 +64,8 @@ export default function LoginPage() {
       >
         دخول
       </button>
+
+      <AdminInstallButton />
     </div>
   );
 }
