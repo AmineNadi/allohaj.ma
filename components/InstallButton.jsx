@@ -1,13 +1,24 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { IoShareOutline } from "react-icons/io5";
+
 
 export default function InstallButton() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [canInstall, setCanInstall] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [isMobileSize, setIsMobileSize] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
+    // Check if screen is small (mobile)
+    const checkMobileSize = () => {
+      setIsMobileSize(window.innerWidth <= 768);
+    };
+
+    checkMobileSize();
+    window.addEventListener('resize', checkMobileSize);
+
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isiOS = /iphone|ipad|ipod/.test(userAgent);
     const isInStandaloneMode = 'standalone' in window.navigator && window.navigator.standalone;
@@ -23,7 +34,11 @@ export default function InstallButton() {
     };
 
     window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+
+    return () => {
+      window.removeEventListener('resize', checkMobileSize);
+      window.removeEventListener('beforeinstallprompt', handler);
+    };
   }, []);
 
   const handleInstall = () => {
@@ -44,9 +59,10 @@ export default function InstallButton() {
     setShowInstructions(false);
   };
 
+  if (!isMobileSize) return null; // 📱 Only show on mobile
+
   return (
     <>
-      {/* Android Button */}
       {canInstall && (
         <button
           onClick={handleInstall}
@@ -56,7 +72,6 @@ export default function InstallButton() {
         </button>
       )}
 
-      {/* iOS Button */}
       {isIOS && (
         <>
           <button
@@ -67,17 +82,23 @@ export default function InstallButton() {
           </button>
 
           {showInstructions && (
-            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-xl max-w-sm text-center shadow-xl">
-                <h2 className="text-lg font-bold mb-2">تثبيت التطبيق على iPhone</h2>
-                <p className="text-sm mb-4">
-                  1. افتح الموقع في <strong>Safari</strong>.<br />
-                  2. اضغط على زر <strong>المشاركة</strong> (🔗 أو 🧭).<br />
-                  3. اختر <strong>"إضافة إلى الشاشة الرئيسية"</strong>.
-                </p>
+            <div className="fixed inset-0 bg-[#000000b5] flex items-center justify-center z-50">
+              <div className="bg-white py-6 px-4 rounded-xl max-w-[90%] shadow-xl">
+                <h2 className="text-lg font-bold mb-2 text-center">كيفية تنزيل التطبيق</h2>
+                <div className="text-sm mb-4 " dir='rtl'>
+                    <span className='flex items-center gap-1.5 flex-wrap'> 1. إضغط على زر المشاركة <IoShareOutline size={14} className='text-blue-800' />  في نافذة المتصفح .<br /></span>
+                    <span >2. اختر <strong>"إضافة إلى الشاشة الرئيسية"</strong>.</span>
+                  
+                </div>
+                <h2 className="text-lg font-bold mb-2 text-center">Comment télécharger l'application</h2>
+                <div className="text-sm mb-4">
+                <span className='flex items-center gap-1.5 flex-wrap'>1. Cliquez sur le bouton de partage <IoShareOutline size={14} className='text-blue-800' /> dans la fenêtre du navigateur. </span>
+                  <span>3. Sélectionnez <strong>« Ajouter à l’écran d’accueil »</strong>.</span>
+                  
+                </div>
                 <button
                   onClick={closeInstructions}
-                  className="mt-2 bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800"
+                  className="mt-2 flex justify-self-center text-center bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800"
                 >
                   فهمت ✅
                 </button>
