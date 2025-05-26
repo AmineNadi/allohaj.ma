@@ -1,12 +1,12 @@
 {
-    "name": "Allohaj.ma",
+    "name": "Allohaj",
     "short_name": "Allohaj",
     "description": "اطلب وجبات طازجة ولذيذة من ألو الحاج. توصيل سريع، طلب سهل، وطعم رائع .",
     "start_url": "/",
     "id": "/",
     "display": "standalone",
-    "background_color": "#2EC6FE",
-    "theme_color": "#8936FF",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
     "orientation": "any",
     "icons": [
       {
