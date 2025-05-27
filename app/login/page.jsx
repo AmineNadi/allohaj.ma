@@ -4,10 +4,8 @@ import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AdminInstallButton from '@/components/AdminInstallButton';
 
-// Ensure the page is fully dynamic (client-side rendered)
 export const dynamic = 'force-dynamic';
 
-// Component to handle searchParams with Suspense
 function LoginContent() {
   const { data: session, status } = typeof window !== 'undefined' ? useSession() : { data: null, status: 'loading' };
   const router = useRouter();
@@ -32,7 +30,13 @@ function LoginContent() {
       setIsLoading(false);
     }
 
-    if (!isGoogleOneTapInitialized.current && clientId && typeof window !== 'undefined') {
+    if (!clientId) {
+      console.error('Google Client ID is missing. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID.');
+      setError('❌ خطأ في الإعدادات. يرجى التواصل مع الدعم.');
+      return;
+    }
+
+    if (!isGoogleOneTapInitialized.current && typeof window !== 'undefined') {
       const script = document.createElement('script');
       script.src = 'https://accounts.google.com/gsi/client';
       script.async = true;
@@ -94,16 +98,29 @@ function LoginContent() {
   const handleEmailLogin = async () => {
     setMessage('');
     setError('');
-    const res = await signIn('email', {
-      email,
-      redirect: false,
-      callbackUrl: '/dashboard',
-    });
 
-    if (res?.ok) {
-      setMessage('✅ تم إرسال رابط تسجيل الدخول إلى بريدك الإلكتروني');
-    } else {
-      setMessage('❌ حدث خطأ أثناء إرسال الرابط. تأكد من صحة البريد.');
+    // Validate email
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('❌ الرجاء إدخال بريد إلكتروني صالح.');
+      return;
+    }
+
+    try {
+      const res = await signIn('email', {
+        email,
+        redirect: false,
+        callbackUrl: '/dashboard',
+      });
+
+      if (res?.ok) {
+        setMessage('✅ تم إرسال رابط تسجيل الدخول إلى بريدك الإلكتروني');
+      } else {
+        setError(`❌ حدث خطأ أثناء إرسال الرابط: ${res?.error || 'تأكد من صحة البريد.'}`);
+        console.error('signIn response:', res);
+      }
+    } catch (err) {
+      setError('❌ حدث خطأ غير متوقع. حاول مرة أخرى لاحقًا.');
+      console.error('Email login error:', err);
     }
   };
 
@@ -117,9 +134,9 @@ function LoginContent() {
 
       <button
         onClick={handleGoogleLogin}
-        disabled={isLoading}
+        disabled={isLoading || !clientId}
         className={`bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded w-full flex items-center justify-center gap-2 ${
-          isLoading ? 'opacity-50 cursor-not-allowed' : ''
+          isLoading || !clientId ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
         <svg
