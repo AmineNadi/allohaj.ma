@@ -1,11 +1,15 @@
 'use client';
 import { signIn, useSession } from 'next-auth/react';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AdminInstallButton from '@/components/AdminInstallButton';
 
-export default function LoginPage() {
-  const { data: session, status } = useSession();
+// Ensure the page is fully dynamic (client-side rendered)
+export const dynamic = 'force-dynamic';
+
+// Component to handle searchParams with Suspense
+function LoginContent() {
+  const { data: session, status } = typeof window !== 'undefined' ? useSession() : { data: null, status: 'loading' };
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
@@ -14,7 +18,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const isGoogleOneTapInitialized = useRef(false);
 
-  // استخرج قيمة الـ client id من المتغيرات البيئة مرة واحدة
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
   useEffect(() => {
@@ -29,14 +32,14 @@ export default function LoginPage() {
       setIsLoading(false);
     }
 
-    if (!isGoogleOneTapInitialized.current && clientId) {
+    if (!isGoogleOneTapInitialized.current && clientId && typeof window !== 'undefined') {
       const script = document.createElement('script');
       script.src = 'https://accounts.google.com/gsi/client';
       script.async = true;
       script.onload = () => {
         if (window.google) {
           window.google.accounts.id.initialize({
-            client_id: clientId,  // استخدم المتغير هنا مباشرة
+            client_id: clientId,
             callback: handleOneTapResponse,
             auto_select: true,
           });
@@ -56,7 +59,9 @@ export default function LoginPage() {
       document.body.appendChild(script);
 
       return () => {
-        document.body.removeChild(script);
+        if (document.body.contains(script)) {
+          document.body.removeChild(script);
+        }
       };
     }
   }, [status, searchParams, router, clientId]);
@@ -117,7 +122,6 @@ export default function LoginPage() {
           isLoading ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
-        {/* أيقونة Google */}
         <svg
           className="w-5 h-5"
           xmlns="http://www.w3.org/2000/svg"
@@ -155,5 +159,13 @@ export default function LoginPage() {
 
       <AdminInstallButton />
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>جارٍ تحميل صفحة تسجيل الدخول...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
