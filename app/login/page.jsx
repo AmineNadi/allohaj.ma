@@ -121,7 +121,7 @@ function LoginContent() {
         redirect: false,
         callbackUrl: '/dashboard',
       });
-
+      console.log('SignIn result:', res);
       if (res?.ok) {
         setMessage('✅ تم إرسال رابط تسجيل الدخول إلى بريدك الإلكتروني');
       } else {
