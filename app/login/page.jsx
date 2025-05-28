@@ -49,11 +49,21 @@ function LoginContent() {
           });
 
           window.google.accounts.id.prompt((notification) => {
-            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-              console.log(
-                'One Tap prompt was not displayed or was skipped:',
-                notification.getNotDisplayedReason()
-              );
+            if (notification.isNotDisplayed()) {
+              console.warn('One Tap prompt not displayed:', {
+                reason: notification.getNotDisplayedReason(),
+                skipped: notification.isSkippedMoment(),
+              });
+            } else if (notification.isSkippedMoment()) {
+              console.warn('One Tap prompt skipped:', {
+                reason: notification.getSkippedReason(),
+                notDisplayed: notification.isNotDisplayed(),
+              });
+            } else {
+              console.log('One Tap prompt status:', {
+                displayed: notification.isDisplayed(),
+                skipped: notification.isSkippedMoment(),
+              });
             }
           });
 
