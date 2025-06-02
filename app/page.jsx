@@ -268,7 +268,7 @@ export default function HomePage() {
                 <li key={idx}>{meal.restaurantName}: {meal.mealName} - {meal.price} DH</li>
               ))}
               <span className="text-green-500 font-bold block mt-6">
-                المجموع الكلي : <span>{totalPrice} DH</span>
+              المجموع : <span>{totalPrice} DH</span>
               </span>
             </ul>
           </AlertDialogHeader>

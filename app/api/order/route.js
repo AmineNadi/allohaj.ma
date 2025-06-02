@@ -36,7 +36,7 @@ export async function POST(req) {
     // إعداد رسالة WhatsApp
     const mealList = meals.map((item) => `${item.meal} (${item.restaurant}) - ${item.price} DH`).join('\n- ');
 
-    const messageFinal = `📦 طلب جديد:\nالاسم: ${name}\nالهاتف: ${phone}\nالوجبات:\n- ${mealList}\n\n💰 المجموع الكلي: ${totalPrice} DH`;
+    const messageFinal = `📦 طلب جديد:\nالاسم: ${name}\nالهاتف: ${phone}\nالوجبات:\n- ${mealList}\n\n💰 المجموع : ${totalPrice} DH`;
     await sendWhatsAppNotification({
       phone: '+212691572526', 
       apikey: '7782866',
